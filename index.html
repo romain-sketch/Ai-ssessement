@@ -1415,9 +1415,6 @@ function submitGate() {
         { name:'lastname',        value: S.gate.last },
         { name:'email',           value: S.gate.email },
         { name:'company',         value: S.gate.company },
-        { name:'role',            value: S.ctx.role || '' },
-        { name:'ai_readiness_score', value: String(r.overall) },
-        { name:'ai_readiness_tier',  value: r.tier },
       ],
       context: { pageUri: location.href, pageName: 'AI Readiness Assessment' }
     })
