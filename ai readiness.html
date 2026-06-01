@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Readiness Assessment | Sifflet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,600&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --ink:       #0D0D12;
+  --ink-2:     #16161E;
+  --ink-3:     #1F1F2A;
+  --ink-4:     #2A2A38;
+  --rule:      rgba(255,255,255,0.07);
+  --rule-soft: rgba(255,255,255,0.04);
+  --off:       #F4F2EE;
+  --off-dim:   rgba(244,242,238,0.5);
+  --off-faint: rgba(244,242,238,0.2);
+  --pink:      #FF015D;
+  --pink-glow: rgba(255,1,93,0.15);
+  --pink-soft: rgba(255,1,93,0.08);
+  --green:     #00D68F;
+  --amber:     #F5A623;
+  --blue:      #4B9EFF;
+  --red:       #FF4757;
+  --mono:      'IBM Plex Mono', monospace;
+  --serif:     'Fraunces', serif;
+  --sans:      'DM Sans', sans-serif;
+  --r:         14px;
+  --r-sm:      8px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--ink);
+  color: var(--off);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── TEXTURE LAYER ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(255,1,93,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 110%, rgba(75,158,255,0.05) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* dotted grid */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── LAYOUT ── */
+#app {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 20px 80px;
+}
+
+/* ── NAV ── */
+nav {
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32px 0 0;
+  margin-bottom: 52px;
+}
+
+.logo {
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: 18px;
+  color: var(--off);
+  text-decoration: none;
+  letter-spacing: -0.3px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.logo-accent { color: var(--pink); }
+
+.nav-chip {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--off-dim);
+  background: var(--ink-3);
+  border: 1px solid var(--rule);
+  padding: 5px 11px;
+  border-radius: 100px;
+}
+
+/* ── PROGRESS ── */
+.progress-shell {
+  width: 100%;
+  max-width: 640px;
+  margin-bottom: 44px;
+  display: none;
+}
+.progress-shell.visible { display: block; }
+
+.prog-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.prog-dim {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--off-faint);
+}
+.prog-frac {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--pink);
+}
+.prog-track {
+  height: 2px;
+  background: var(--ink-4);
+  border-radius: 1px;
+  overflow: hidden;
+}
+.prog-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--pink), #FF6BA8);
+  border-radius: 1px;
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── SCREEN ── */
+.screen {
+  width: 100%;
+  max-width: 640px;
+  animation: rise 0.38s cubic-bezier(0.4,0,0.2,1) both;
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── INTRO ── */
+.intro-kicker {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pink);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.intro-kicker::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+  max-width: 60px;
+}
+
+.intro-h1 {
+  font-family: var(--serif);
+  font-size: clamp(36px, 6vw, 58px);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  margin-bottom: 22px;
+  color: var(--off);
+}
+.intro-h1 em {
+  font-style: italic;
+  color: var(--pink);
+}
+
+.intro-body {
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.7;
+  color: var(--off-dim);
+  margin-bottom: 38px;
+  max-width: 500px;
+}
+
+.intro-stats {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--off-faint);
+}
+.stat-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--pink);
+  flex-shrink: 0;
+}
+
+/* ── DIMENSION PILLS on intro ── */
+.intro-dims {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 44px;
+}
+.dim-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--off-dim);
+  background: var(--ink-3);
+  border: 1px solid var(--rule);
+  padding: 6px 13px 6px 10px;
+  border-radius: 100px;
+}
+.dim-pill-icon {
+  width: 18px; height: 18px;
+  background: var(--ink-4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+}
+
+/* ── CONTEXT ── */
+.ctx-heading {
+  font-family: var(--serif);
+  font-size: clamp(22px, 3.5vw, 30px);
+  font-weight: 600;
+  letter-spacing: -1px;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+.ctx-sub {
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--off-dim);
+  margin-bottom: 36px;
+  line-height: 1.6;
+}
+
+.ctx-block { margin-bottom: 28px; }
+.ctx-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--off-faint);
+  margin-bottom: 10px;
+}
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--off-dim);
+  background: var(--ink-2);
+  border: 1px solid var(--rule);
+  padding: 8px 16px;
+  border-radius: var(--r-sm);
+  transition: all 0.16s ease;
+  user-select: none;
+  line-height: 1;
+}
+.chip:hover { border-color: rgba(255,1,93,0.35); color: var(--off); }
+.chip.on {
+  background: var(--pink-soft);
+  border-color: var(--pink);
+  color: var(--off);
+}
+
+/* ── QUESTION ── */
+.q-dim-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--off-faint);
+  margin-bottom: 22px;
+}
+.q-dim-icon {
+  width: 22px; height: 22px;
+  background: var(--ink-3);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+
+.q-text {
+  font-family: var(--serif);
+  font-size: clamp(19px, 2.8vw, 24px);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.6px;
+  margin-bottom: 28px;
+  color: var(--off);
+}
+
+.opts { display: grid; gap: 9px; margin-bottom: 32px; }
+
+.opt {
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 15px 18px;
+  background: var(--ink-2);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  transition: all 0.16s ease;
+  text-align: left;
+  width: 100%;
+}
+.opt:hover {
+  border-color: rgba(255,1,93,0.3);
+  background: var(--ink-3);
+}
+.opt.on {
+  background: var(--pink-soft);
+  border-color: var(--pink);
+}
+
+.opt-glyph {
+  flex-shrink: 0;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--off-faint);
+  margin-top: 1px;
+  transition: all 0.16s ease;
+}
+.opt.on .opt-glyph {
+  background: var(--pink);
+  border-color: var(--pink);
+  color: #fff;
+  font-size: 12px;
+}
+
+.opt-body {
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.55;
+  color: rgba(244,242,238,0.7);
+  transition: color 0.16s;
+}
+.opt.on .opt-body { color: var(--off); }
+
+/* ── NAV ROW ── */
+.nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ── BUTTONS ── */
+.btn-p {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--pink);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 13px 26px;
+  border-radius: var(--r-sm);
+  border: none;
+  transition: all 0.17s ease;
+  text-decoration: none;
+  letter-spacing: -0.1px;
+}
+.btn-p:hover {
+  background: #d40050;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 28px rgba(255,1,93,0.28);
+}
+.btn-p:active { transform: none; }
+.btn-p:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-p.full { width: 100%; }
+
+.btn-ghost {
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: var(--off-faint);
+  font-family: var(--sans);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0;
+  transition: color 0.16s;
+}
+.btn-ghost:hover { color: var(--off-dim); }
+
+.btn-outline {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--off-dim);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 400;
+  padding: 11px 22px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--rule);
+  transition: all 0.16s ease;
+  width: 100%;
+  letter-spacing: -0.1px;
+}
+.btn-outline:hover { border-color: rgba(255,255,255,0.15); color: var(--off); }
+
+/* ── GATE ── */
+.gate-h {
+  font-family: var(--serif);
+  font-size: clamp(26px, 4vw, 38px);
+  font-weight: 600;
+  letter-spacing: -1.2px;
+  line-height: 1.15;
+  margin-bottom: 10px;
+}
+.gate-sub {
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--off-dim);
+  margin-bottom: 28px;
+  line-height: 1.6;
+}
+
+/* score teaser */
+.score-teaser {
+  position: relative;
+  background: var(--ink-2);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  padding: 24px 24px 20px;
+  margin-bottom: 28px;
+  overflow: hidden;
+}
+.score-teaser::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--pink-soft) 0%, transparent 55%);
+  pointer-events: none;
+}
+.score-teaser-inner { position: relative; }
+.score-teaser-num {
+  font-family: var(--serif);
+  font-size: 80px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--pink);
+  filter: blur(14px);
+  opacity: 0.45;
+  user-select: none;
+  margin-bottom: 6px;
+  letter-spacing: -4px;
+}
+.score-teaser-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--off-faint);
+}
+
+/* dim preview bars */
+.dim-preview {
+  display: grid;
+  gap: 6px;
+  margin-top: 16px;
+}
+.dim-prev-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dim-prev-name {
+  font-family: var(--mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--off-faint);
+  min-width: 90px;
+}
+.dim-prev-track {
+  flex: 1;
+  height: 3px;
+  background: var(--ink-4);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.dim-prev-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--ink-4);
+  filter: blur(2px);
+  opacity: 0.4;
+}
+
+/* form */
+.gate-form { display: grid; gap: 12px; margin-bottom: 18px; }
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--off-faint);
+}
+.field input, .field select {
+  background: var(--ink-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  padding: 11px 13px;
+  color: var(--off);
+  font-family: var(--sans);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.16s;
+  -webkit-appearance: none;
+}
+.field input:focus, .field select:focus {
+  border-color: rgba(255,1,93,0.45);
+}
+.field input::placeholder { color: var(--off-faint); }
+.field select option { background: var(--ink-3); }
+
+.consent {
+  font-size: 11px;
+  color: var(--off-faint);
+  line-height: 1.55;
+  margin-bottom: 20px;
+}
+.consent a { color: var(--off-dim); }
+
+/* ── RESULTS ── */
+.results-top {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 28px;
+  align-items: start;
+  margin-bottom: 32px;
+}
+
+/* ring */
+.ring-wrap {
+  position: relative;
+  width: 120px; height: 120px;
+  flex-shrink: 0;
+}
+.ring-wrap svg { transform: rotate(-90deg); }
+.ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.ring-num {
+  font-family: var(--serif);
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -1.5px;
+}
+.ring-of {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--off-faint);
+  letter-spacing: 0.08em;
+  margin-top: 2px;
+}
+
+.score-right {}
+.tier-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 11px;
+  border-radius: 100px;
+  margin-bottom: 10px;
+}
+.tier-pill.not-ready  { background: rgba(255,71,87,0.12);  color: var(--red);   border: 1px solid rgba(255,71,87,0.25); }
+.tier-pill.emerging   { background: rgba(245,166,35,0.12); color: var(--amber); border: 1px solid rgba(245,166,35,0.25); }
+.tier-pill.advancing  { background: rgba(75,158,255,0.12); color: var(--blue);  border: 1px solid rgba(75,158,255,0.25); }
+.tier-pill.ai-ready   { background: rgba(0,214,143,0.12);  color: var(--green); border: 1px solid rgba(0,214,143,0.25); }
+
+.score-title {
+  font-family: var(--serif);
+  font-size: clamp(20px, 3vw, 26px);
+  font-weight: 600;
+  letter-spacing: -0.7px;
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+.score-ctx {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--off-faint);
+}
+
+/* narrative */
+.narrative {
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.7;
+  color: var(--off-dim);
+  padding: 18px 20px;
+  background: var(--ink-2);
+  border: 1px solid var(--rule);
+  border-left: 2px solid var(--pink);
+  border-radius: var(--r-sm);
+  margin-bottom: 28px;
+}
+
+/* dimension breakdown */
+.dims-head {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--off-faint);
+  margin-bottom: 12px;
+}
+
+.dim-rows { display: grid; gap: 8px; margin-bottom: 32px; }
+.dim-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 15px;
+  background: var(--ink-2);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+}
+.dim-row-icon {
+  width: 32px; height: 32px;
+  background: var(--ink-3);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.dim-row-info { flex: 1; min-width: 0; }
+.dim-row-name {
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 5px;
+  color: var(--off);
+}
+.dim-row-bar { height: 3px; background: var(--ink-4); border-radius: 2px; overflow: hidden; }
+.dim-row-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 1.1s cubic-bezier(0.4,0,0.2,1) 0.2s;
+}
+.dim-row-score {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  min-width: 34px;
+  text-align: right;
+}
+.dim-row-note {
+  font-size: 11px;
+  font-weight: 300;
+  color: var(--off-faint);
+  line-height: 1.45;
+  margin-top: 4px;
+}
+
+/* resources strip */
+.resources {
+  margin-bottom: 28px;
+}
+.resources-head {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--off-faint);
+  margin-bottom: 12px;
+}
+.res-links { display: grid; gap: 8px; }
+.res-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 15px;
+  background: var(--ink-2);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  text-decoration: none;
+  transition: all 0.16s ease;
+  color: var(--off-dim);
+}
+.res-link:hover {
+  border-color: rgba(255,1,93,0.25);
+  color: var(--off);
+}
+.res-link-text { font-size: 13px; font-weight: 400; }
+.res-link-arrow {
+  font-size: 14px;
+  color: var(--pink);
+  flex-shrink: 0;
+}
+
+/* CTA block */
+.cta-block {
+  background: var(--ink-2);
+  border: 1px solid rgba(255,1,93,0.2);
+  border-radius: var(--r);
+  padding: 30px 28px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+.cta-block::before {
+  content: '';
+  position: absolute;
+  bottom: -60px; right: -60px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(255,1,93,0.1) 0%, transparent 65%);
+  pointer-events: none;
+}
+.cta-block::after {
+  content: '';
+  position: absolute;
+  top: -40px; left: -40px;
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, rgba(75,158,255,0.06) 0%, transparent 65%);
+  pointer-events: none;
+}
+.cta-inner { position: relative; }
+.cta-h {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.7px;
+  margin-bottom: 8px;
+}
+.cta-p {
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--off-dim);
+  margin-bottom: 22px;
+  line-height: 1.6;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.cta-btns { display: flex; flex-direction: column; gap: 10px; }
+
+/* footer */
+.screen-foot {
+  margin-top: 40px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--off-faint);
+  line-height: 1.6;
+}
+.screen-foot a { color: var(--off-faint); text-decoration: underline; text-underline-offset: 3px; }
+
+@media (max-width: 500px) {
+  .row-2 { grid-template-columns: 1fr; }
+  .results-top { grid-template-columns: 1fr; }
+  .intro-stats { gap: 14px; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <nav>
+    <a class="logo" href="https://siffletdata.com" target="_blank">
+      sifflet<span class="logo-accent">.</span>
+    </a>
+    <span class="nav-chip">AI Readiness</span>
+  </nav>
+
+  <div class="progress-shell" id="prog">
+    <div class="prog-meta">
+      <span class="prog-dim" id="prog-dim">Governance</span>
+      <span class="prog-frac" id="prog-frac">1 / 9</span>
+    </div>
+    <div class="prog-track">
+      <div class="prog-fill" id="prog-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen"></div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════ */
+
+const DIMS = [
+  { id:'gov',      label:'Governance',        icon:'◈', weight:.22 },
+  { id:'quality',  label:'Data Quality',       icon:'◎', weight:.22 },
+  { id:'lineage',  label:'Lineage',            icon:'⟜', weight:.18 },
+  { id:'semantic', label:'Semantic Layer',     icon:'⬡', weight:.16 },
+  { id:'agents',   label:'Agent Readiness',    icon:'⊙', weight:.12 },
+  { id:'cost',     label:'Cost Governance',    icon:'◇', weight:.10 },
+];
+
+const Qs = [
+  // Governance — 2
+  {
+    id:'g1', dim:'gov',
+    text:'How would you describe your current data governance programme?',
+    opts:[
+      {t:'We have policies on paper but limited operational implementation', s:1},
+      {t:'Governance is enforced in some domains but inconsistently across the stack', s:2},
+      {t:'We have a working governance framework but it isn\'t yet instrumented for AI workloads', s:3},
+      {t:'Governance is continuously enforced, monitored, and AI-aware', s:4},
+    ]
+  },
+  {
+    id:'g2', dim:'gov',
+    text:'When a dataset changes structure or ownership, how is governance updated?',
+    opts:[
+      {t:'Manually, when someone notices and raises it', s:1},
+      {t:'Via a periodic review process — quarterly or at release', s:2},
+      {t:'Mostly automated but some manual reconciliation required', s:3},
+      {t:'Automatically, triggered by the change itself', s:4},
+    ]
+  },
+  // Data Quality — 2
+  {
+    id:'q1', dim:'quality',
+    text:'How do you detect data quality issues in pipelines that feed AI models or analytics?',
+    opts:[
+      {t:'When a downstream user or system reports a problem', s:1},
+      {t:'Via scheduled checks run at fixed intervals', s:2},
+      {t:'A mix of automated alerts and manual validation', s:3},
+      {t:'Continuous automated monitoring with anomaly detection', s:4},
+    ]
+  },
+  {
+    id:'q2', dim:'quality',
+    text:'When a quality issue is found, how long does root cause analysis typically take?',
+    opts:[
+      {t:'Days — we reconstruct manually across teams', s:1},
+      {t:'Hours — we have some tooling but it requires effort', s:2},
+      {t:'Under an hour for most issues', s:3},
+      {t:'Minutes — lineage and impact are immediately visible', s:4},
+    ]
+  },
+  // Lineage — 1
+  {
+    id:'l1', dim:'lineage',
+    text:'Can you trace any data point feeding an AI model back to its original source?',
+    opts:[
+      {t:'No — lineage is undocumented or held in individual memory', s:1},
+      {t:'Partially — for some pipelines, manually documented', s:2},
+      {t:'For most pipelines, via a catalog or documentation system', s:3},
+      {t:'Yes — full automated lineage from source to model output', s:4},
+    ]
+  },
+  // Semantic — 2
+  {
+    id:'s1', dim:'semantic',
+    text:'Where does your organisation store the definitions that AI systems and analysts rely on?',
+    opts:[
+      {t:'In individual documents, wikis, or people\'s heads', s:1},
+      {t:'Spread across multiple tools with no single source of truth', s:2},
+      {t:'Partially centralised — one tool used by most teams', s:3},
+      {t:'A single, enforced semantic layer — one definition, everywhere', s:4},
+    ]
+  },
+  {
+    id:'s2', dim:'semantic',
+    text:'If an AI model makes a decision based on a metric like "churn" or "revenue", how confident are you the definition matches what the business intends?',
+    opts:[
+      {t:'Not confident — definitions vary by team and system', s:1},
+      {t:'Somewhat confident for major metrics, less so for the rest', s:2},
+      {t:'Confident for core metrics — we have documented standards', s:3},
+      {t:'Fully confident — definitions are enforced at the data layer', s:4},
+    ]
+  },
+  // Agents — 1
+  {
+    id:'a1', dim:'agents',
+    text:'If an AI agent acts on your data autonomously today — triggering a workflow, generating a report, making a recommendation — how confident are you the data it acts on is trustworthy?',
+    opts:[
+      {t:'Not confident — we have limited visibility into what it reads', s:1},
+      {t:'Partially confident — we validate inputs for critical agents only', s:2},
+      {t:'Mostly confident — we monitor key pipelines agents depend on', s:3},
+      {t:'Fully confident — all agent inputs are continuously monitored and governed', s:4},
+    ]
+  },
+  // Cost — 1
+  {
+    id:'c1', dim:'cost',
+    text:'Do you have visibility into which data pipelines are driving the most compute and storage cost in your AI workloads?',
+    opts:[
+      {t:'No — cost attribution at the pipeline level is not in place', s:1},
+      {t:'Partially — we can see high-level trends but not pipeline-level detail', s:2},
+      {t:'Yes, for most workloads — we have cost dashboards', s:3},
+      {t:'Yes — pipeline-level cost is monitored with alerts on anomalies', s:4},
+    ]
+  },
+];
+
+const TIERS = {
+  'not-ready':  { label:'Not Yet Ready',  range:[0,30],  color:'#FF4757' },
+  'emerging':   { label:'Emerging',       range:[31,55], color:'#F5A623' },
+  'advancing':  { label:'Advancing',      range:[56,75], color:'#4B9EFF' },
+  'ai-ready':   { label:'AI‑Ready',       range:[76,100],color:'#00D68F' },
+};
+
+const NARRATIVES = {
+  'not-ready': {
+    CDO:'Your data stack is not yet structured to support reliable AI at scale. The risk is not that AI won\'t work — it\'s that it will, confidently, on data that isn\'t trustworthy. The first step is establishing continuous data quality monitoring and basic lineage visibility before expanding your AI footprint.',
+    Engineer:'The foundations your AI models need — clean inputs, traceable lineage, enforced definitions — aren\'t consistently in place. You\'re likely firefighting incidents reactively. Establishing automated quality checks and a centralised semantic layer will have the most immediate impact.',
+    Analyst:'Your current infrastructure means AI outputs are hard to trust or explain. Before scaling AI-driven insights, focus on getting governance and data definitions aligned across the teams producing and consuming data.',
+    default:'Your current data infrastructure creates meaningful risk for AI workloads. AI systems are confident by design — they won\'t tell you the input data was wrong. Establishing continuous monitoring and lineage should be the immediate priority before expanding AI investment.',
+  },
+  'emerging': {
+    CDO:'You have the right instincts but incomplete coverage. Governance and quality controls exist in pockets. The gap to close is consistency — making the controls that work in one domain work everywhere, and instrumenting them for the speed at which AI systems will consume your data.',
+    Engineer:'Some of the right infrastructure is in place. The challenge is that AI workloads will surface edge cases your current monitoring doesn\'t catch. Expanding lineage coverage and moving from scheduled to continuous quality checks are the highest-leverage next steps.',
+    Analyst:'You\'re getting closer to reliable AI outputs, but metric inconsistency and partial governance mean trust issues will keep surfacing. Centralising your semantic layer and tightening quality monitoring on the pipelines feeding your key models will have the most direct impact.',
+    default:'You\'re building the right foundations but coverage is inconsistent. AI systems will route around gaps you haven\'t instrumented yet. Closing the coverage gap in data quality monitoring and getting to a single semantic source of truth are the moves that matter most now.',
+  },
+  'advancing': {
+    CDO:'You\'re ahead of most organisations. The infrastructure is largely in place and AI workloads are relatively well-served. The remaining exposure is in agent reliability and cost governance — as autonomous AI systems proliferate, the blast radius of ungoverned inputs grows significantly.',
+    Engineer:'Strong foundations. The risk at this maturity level tends to be in the pipelines you haven\'t got to yet, and in the semantic consistency of definitions across domains. As your agent footprint grows, ensuring every agent input is monitored becomes the critical next step.',
+    Analyst:'Good visibility and reasonable governance in place. The gap is typically in semantic consistency — ensuring that when AI systems make decisions, they\'re working from the same definitions as your business teams. That alignment becomes more critical as AI autonomy increases.',
+    default:'Your data infrastructure is well-positioned for current AI workloads. The area to focus on is ensuring that as AI autonomy increases, the governance, monitoring, and semantic consistency that covers your current stack extends to every new workload you introduce.',
+  },
+  'ai-ready': {
+    CDO:'Your organisation is genuinely AI-ready from a data infrastructure perspective. Continuous monitoring, governed lineage, and enforced semantics mean AI systems are working from trustworthy inputs. The priority now is maintaining that standard as your AI footprint expands and new agent workloads are introduced.',
+    Engineer:'Excellent infrastructure maturity. The risk at this level is drift — as the stack evolves and new data sources are added, maintaining the governance and monitoring standards you\'ve built requires continuous investment. The control plane you have is a competitive asset.',
+    Analyst:'Strong governance and semantic consistency mean your AI outputs are genuinely trustworthy. The focus should be on extending that standard to emerging use cases — particularly as conversational data access and autonomous agents become part of the standard analyst workflow.',
+    default:'You have the data infrastructure AI workloads require. Continuous monitoring, lineage, governed semantics, and cost visibility are in place. The priority is ensuring that standard is maintained as the stack evolves — and that every new AI workload inherits the same control plane.',
+  },
+};
+
+const DIM_NOTES = {
+  gov:     { low:'Governance gaps create silent AI failures that are hard to attribute and harder to fix.', high:'Strong governance means AI decisions inherit the trustworthiness of the data foundation.' },
+  quality: { low:'Reactive quality detection means AI models are running on stale or broken inputs before anyone notices.', high:'Continuous quality monitoring is the baseline for any production AI workload.' },
+  lineage: { low:'Without lineage, a bad model output can\'t be traced to its cause — root cause becomes archaeology.', high:'Full lineage makes AI explainability achievable, not aspirational.' },
+  semantic:{ low:'Inconsistent definitions mean your AI is confident about the wrong thing. Semantic consistency is non-negotiable.', high:'A single semantic layer is what separates AI that advises from AI that confuses.' },
+  agents:  { low:'As agents proliferate, ungoverned inputs create a cascade risk that manual oversight cannot contain.', high:'Governed agent inputs are the difference between autonomous AI and reckless automation.' },
+  cost:    { low:'AI data processing costs will rise — without pipeline-level visibility, budget overruns arrive as surprises.', high:'Pipeline-level cost governance turns AI economics from a concern into a managed variable.' },
+};
+
+const RESOURCES = [
+  { label:'AI-Ready Reliability — Sifflet use case', url:'https://www.siffletdata.com/solution-by-use-case/ai-ready-reliability' },
+  { label:'AI Agents for Data Observability', url:'https://www.siffletdata.com/blog/sifflet-ai-agents' },
+  { label:'Enforcing Data Governance', url:'https://www.siffletdata.com/solution-by-use-case/enforcing-data-governance' },
+  { label:'The Data Observability Buyer\'s Guide', url:'https://www.siffletdata.com/buyers-guide' },
+];
+
+/* ═══════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════ */
+
+let S = {
+  phase:   'intro',   // intro | context | questions | gate | results
+  ctx:     { role: null },
+  qi:      0,
+  ans:     {},        // qid -> score 1-4
+  gate:    { first:'', last:'', email:'', company:'' },
+};
+
+/* ═══════════════════════════════════════════
+   COMPUTE
+═══════════════════════════════════════════ */
+
+function compute() {
+  const dimScores = {};
+  DIMS.forEach(d => {
+    const qs = Qs.filter(q => q.dim === d.id);
+    const answered = qs.filter(q => S.ans[q.id] != null);
+    if (!answered.length) { dimScores[d.id] = 0; return; }
+    const avg = answered.reduce((a, q) => a + S.ans[q.id], 0) / answered.length;
+    dimScores[d.id] = Math.round(((avg - 1) / 3) * 100);
+  });
+
+  const overall = Math.round(
+    DIMS.reduce((a, d) => a + (dimScores[d.id] || 0) * d.weight, 0)
+  );
+
+  let tier = 'not-ready';
+  if (overall > 75) tier = 'ai-ready';
+  else if (overall > 55) tier = 'advancing';
+  else if (overall > 30) tier = 'emerging';
+
+  const role = S.ctx.role || 'default';
+  const narrative = (NARRATIVES[tier][role] || NARRATIVES[tier]['default']);
+
+  return { overall, dimScores, tier, narrative };
+}
+
+/* ═══════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════ */
+
+function render() {
+  const scr = document.getElementById('screen');
+  const prog = document.getElementById('prog');
+
+  prog.className = 'progress-shell' + (S.phase === 'questions' ? ' visible' : '');
+
+  if (S.phase === 'questions') {
+    const total = Qs.length;
+    document.getElementById('prog-fill').style.width = `${(S.qi / total) * 100}%`;
+    document.getElementById('prog-frac').textContent = `${S.qi + 1} / ${total}`;
+    const dim = DIMS.find(d => d.id === Qs[S.qi].dim);
+    document.getElementById('prog-dim').textContent = dim ? dim.label : '';
+  }
+
+  scr.style.animation = 'none';
+  requestAnimationFrame(() => {
+    scr.style.animation = '';
+    scr.innerHTML = phases[S.phase]();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (S.phase === 'results') animateBars();
+  });
+}
+
+const phases = {
+
+  intro() {
+    return `
+      <div class="intro-kicker">Gartner D&amp;A Summit 2025</div>
+      <h1 class="intro-h1">Is your data stack<br/><em>actually</em> ready<br/>for AI?</h1>
+      <p class="intro-body">
+        Five themes dominated the Gartner Data &amp; Analytics Summit in London:
+        governance, semantic layers, agent readiness, dashboard trust, and rising costs.
+        Each one maps to a gap most data teams haven't fully closed yet.<br/><br/>
+        This 3-minute assessment tells you where you stand across all five.
+      </p>
+      <div class="intro-stats">
+        <span class="stat"><span class="stat-dot"></span>9 questions</span>
+        <span class="stat"><span class="stat-dot"></span>~3 minutes</span>
+        <span class="stat"><span class="stat-dot"></span>Personalised breakdown</span>
+      </div>
+      <div class="intro-dims">
+        ${DIMS.map(d => `
+          <span class="dim-pill">
+            <span class="dim-pill-icon">${d.icon}</span>
+            ${d.label}
+          </span>
+        `).join('')}
+      </div>
+      <button class="btn-p full" onclick="go('context')">Start the assessment →</button>
+      <div class="screen-foot" style="margin-top:20px">Free. No commitment. Results unlocked instantly.</div>
+    `;
+  },
+
+  context() {
+    const roles = [
+      ['CDO','Chief Data Officer'],
+      ['Engineer','Data Engineer / Architect'],
+      ['Analyst','Analytics / BI Leader'],
+      ['default','Other'],
+    ];
+    const can = !!S.ctx.role;
+    return `
+      <div class="ctx-heading">One quick question<br/>before we start.</div>
+      <p class="ctx-sub">Your results will be framed around what matters most for your role.</p>
+      <div class="ctx-block">
+        <div class="ctx-label">Your role</div>
+        <div class="chip-row">
+          ${roles.map(([val, label]) => `
+            <button class="chip${S.ctx.role === val ? ' on' : ''}"
+              onclick="setCtx('role','${val}')">${label}</button>
+          `).join('')}
+        </div>
+      </div>
+      <div class="nav-row" style="margin-top:36px">
+        <button class="btn-ghost" onclick="go('intro')">← Back</button>
+        <button class="btn-p" onclick="go('questions')" ${can ? '' : 'disabled'}>
+          Continue →
+        </button>
+      </div>
+    `;
+  },
+
+  questions() {
+    const q = Qs[S.qi];
+    const dim = DIMS.find(d => d.id === q.dim);
+    const sel = S.ans[q.id];
+    const isLast = S.qi === Qs.length - 1;
+    return `
+      <div class="q-dim-tag">
+        <div class="q-dim-icon">${dim.icon}</div>
+        ${dim.label}
+      </div>
+      <div class="q-text">${q.text}</div>
+      <div class="opts">
+        ${q.opts.map((o, i) => `
+          <button class="opt${sel === o.s ? ' on' : ''}"
+            onclick="pick('${q.id}', ${o.s})">
+            <div class="opt-glyph">${sel === o.s ? '✓' : ['A','B','C','D'][i]}</div>
+            <div class="opt-body">${o.t}</div>
+          </button>
+        `).join('')}
+      </div>
+      <div class="nav-row">
+        <button class="btn-ghost" onclick="prevQ()">← Back</button>
+        <button class="btn-p" onclick="nextQ()"
+          ${sel != null ? '' : 'disabled'}>
+          ${isLast ? 'See my results →' : 'Next →'}
+        </button>
+      </div>
+    `;
+  },
+
+  gate() {
+    const { overall } = compute();
+    const dimPreviews = DIMS.map(d => {
+      const randW = 15 + Math.floor(Math.random() * 60);
+      return `
+        <div class="dim-prev-row">
+          <div class="dim-prev-name">${d.label}</div>
+          <div class="dim-prev-track"><div class="dim-prev-fill" style="width:${randW}%"></div></div>
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="gate-h">Your results are<br/>waiting.</div>
+      <p class="gate-sub">Enter your details to unlock your full AI readiness score, per-dimension breakdown, and personalised next steps.</p>
+
+      <div class="score-teaser">
+        <div class="score-teaser-inner">
+          <div class="score-teaser-num">${overall}</div>
+          <div class="score-teaser-label">Your readiness index — unlock to reveal</div>
+          <div class="dim-preview" style="margin-top:14px">${dimPreviews}</div>
+        </div>
+      </div>
+
+      <div class="gate-form">
+        <div class="row-2">
+          <div class="field">
+            <label>First name</label>
+            <input type="text" placeholder="Marie" value="${S.gate.first}"
+              oninput="sg('first',this.value)"/>
+          </div>
+          <div class="field">
+            <label>Last name</label>
+            <input type="text" placeholder="Dupont" value="${S.gate.last}"
+              oninput="sg('last',this.value)"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Work email</label>
+          <input type="email" placeholder="marie@company.com" value="${S.gate.email}"
+            oninput="sg('email',this.value)"/>
+        </div>
+        <div class="field">
+          <label>Company</label>
+          <input type="text" placeholder="Your company" value="${S.gate.company}"
+            oninput="sg('company',this.value)"/>
+        </div>
+      </div>
+
+      <p class="consent">By submitting you agree Sifflet may follow up on your results.
+        <a href="https://www.siffletdata.com/privacy-policy" target="_blank">Privacy policy →</a>
+      </p>
+
+      <button class="btn-p full" onclick="submitGate()">Unlock my results →</button>
+    `;
+  },
+
+  results() {
+    const { overall, dimScores, tier, narrative } = compute();
+    const tInfo = TIERS[tier];
+    const C = circumference(44);
+    const offset = C * (1 - overall / 100);
+
+    const dimRows = DIMS.map(d => {
+      const sc = dimScores[d.id] || 0;
+      let col = '#FF4757';
+      if (sc > 75) col = '#00D68F';
+      else if (sc > 55) col = '#4B9EFF';
+      else if (sc > 30) col = '#F5A623';
+      const note = sc <= 50
+        ? DIM_NOTES[d.id].low
+        : DIM_NOTES[d.id].high;
+      return `
+        <div class="dim-row">
+          <div class="dim-row-icon">${d.icon}</div>
+          <div class="dim-row-info">
+            <div class="dim-row-name">${d.label}</div>
+            <div class="dim-row-bar">
+              <div class="dim-row-fill" data-w="${sc}" style="width:0%;background:${col}"></div>
+            </div>
+            <div class="dim-row-note">${note}</div>
+          </div>
+          <div class="dim-row-score" style="color:${col}">${sc}</div>
+        </div>
+      `;
+    }).join('');
+
+    const resLinks = RESOURCES.map(r => `
+      <a class="res-link" href="${r.url}" target="_blank">
+        <span class="res-link-text">${r.label}</span>
+        <span class="res-link-arrow">→</span>
+      </a>
+    `).join('');
+
+    return `
+      <div class="results-top">
+        <div class="ring-wrap">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="44" fill="none"
+              stroke="rgba(255,255,255,0.05)" stroke-width="9"/>
+            <circle cx="60" cy="60" r="44" fill="none"
+              stroke="${tInfo.color}" stroke-width="9"
+              stroke-linecap="round"
+              stroke-dasharray="${C}"
+              stroke-dashoffset="${offset}"
+              id="ring-arc"
+              style="transition: stroke-dashoffset 1.3s cubic-bezier(0.4,0,0.2,1)"/>
+          </svg>
+          <div class="ring-center">
+            <div class="ring-num">${overall}</div>
+            <div class="ring-of">/ 100</div>
+          </div>
+        </div>
+        <div class="score-right">
+          <div class="tier-pill ${tier}">${tInfo.label}</div>
+          <div class="score-title">Your AI<br/>Readiness Score</div>
+          <div class="score-ctx">${S.ctx.role === 'default' ? 'Data professional' : S.ctx.role || 'Data professional'}</div>
+        </div>
+      </div>
+
+      <div class="narrative">${narrative}</div>
+
+      <div class="dims-head">Score by dimension</div>
+      <div class="dim-rows">${dimRows}</div>
+
+      <div class="resources">
+        <div class="resources-head">Go deeper</div>
+        <div class="res-links">${resLinks}</div>
+      </div>
+
+      <div class="cta-block">
+        <div class="cta-inner">
+          <div class="cta-h">See what closing the gap looks like.</div>
+          <p class="cta-p">Book a 30-minute session with a Sifflet data specialist. We'll walk through your score, your specific stack, and the highest-leverage moves.</p>
+          <div class="cta-btns">
+            <a class="btn-p" href="https://www.siffletdata.com/contact-us" target="_blank">Talk to a specialist →</a>
+            <a class="btn-p" href="https://www.siffletdata.com/free-trial" target="_blank"
+              style="background:transparent;border:1px solid rgba(255,255,255,0.12);color:var(--off-dim)">
+              Try Sifflet free →
+            </a>
+            <button class="btn-outline" onclick="restart()">Retake the assessment</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="screen-foot">
+        <a href="https://www.siffletdata.com/solution-by-use-case/ai-ready-reliability" target="_blank">
+          Sifflet AI-Ready Reliability →
+        </a>
+        &nbsp;·&nbsp;
+        <a href="https://www.siffletdata.com/blog" target="_blank">The Whistle — our blog</a>
+      </div>
+    `;
+  }
+};
+
+/* ═══════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════ */
+
+function circumference(r) { return 2 * Math.PI * r; }
+
+function animateBars() {
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.dim-row-fill').forEach(el => {
+      el.style.width = el.dataset.w + '%';
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════
+   ACTIONS
+═══════════════════════════════════════════ */
+
+function go(phase) {
+  S.phase = phase;
+  if (phase === 'questions') S.qi = 0;
+  render();
+}
+
+function setCtx(k, v) {
+  S.ctx[k] = v;
+  render();
+}
+
+function pick(id, score) {
+  S.ans[id] = score;
+  render();
+  setTimeout(() => {
+    if (S.ans[id] != null) nextQ();
+  }, 300);
+}
+
+function nextQ() {
+  if (S.ans[Qs[S.qi]?.id] == null) return;
+  if (S.qi < Qs.length - 1) {
+    S.qi++;
+    render();
+  } else {
+    S.phase = 'gate';
+    render();
+  }
+}
+
+function prevQ() {
+  if (S.qi > 0) { S.qi--; render(); }
+  else { S.phase = 'context'; render(); }
+}
+
+function sg(k, v) { S.gate[k] = v; }
+
+function submitGate() {
+  const { first, email, company } = S.gate;
+  if (!first || !email || !company) {
+    alert('Please fill in first name, work email, and company.');
+    return;
+  }
+  const r = compute();
+  // HubSpot submission — swap FORM_GUID before deploy
+  const PORTAL = '24383351';
+  const FORM   = 'REPLACE_WITH_HUBSPOT_FORM_GUID';
+  fetch(`https://api.hsforms.com/submissions/v3/integration/submit/${PORTAL}/${FORM}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      fields: [
+        { name:'firstname',       value: S.gate.first },
+        { name:'lastname',        value: S.gate.last },
+        { name:'email',           value: S.gate.email },
+        { name:'company',         value: S.gate.company },
+        { name:'role',            value: S.ctx.role || '' },
+        { name:'ai_readiness_score', value: String(r.overall) },
+        { name:'ai_readiness_tier',  value: r.tier },
+      ],
+      context: { pageUri: location.href, pageName: 'AI Readiness Assessment' }
+    })
+  }).catch(() => {});
+
+  S.phase = 'results';
+  render();
+}
+
+function restart() {
+  S = { phase:'intro', ctx:{ role:null }, qi:0, ans:{}, gate:{ first:'',last:'',email:'',company:'' } };
+  render();
+}
+
+/* ═══════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+render();
+</script>
+</body>
+</html>
