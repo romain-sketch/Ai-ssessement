@@ -1405,7 +1405,7 @@ function submitGate() {
   const r = compute();
   // HubSpot submission — swap FORM_GUID before deploy
   const PORTAL = '24383351';
-  const FORM   = 'REPLACE_WITH_HUBSPOT_FORM_GUID';
+  const FORM   = '83fb0e24-1567-4d01-a1bc-435a187dff35';
   fetch(`https://api.hsforms.com/submissions/v3/integration/submit/${PORTAL}/${FORM}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
