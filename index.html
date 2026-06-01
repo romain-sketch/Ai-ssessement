@@ -1418,7 +1418,7 @@ function submitGate() {
       ],
       context: { pageUri: location.href, pageName: 'AI Readiness Assessment' }
     })
-  }).catch(() => {});
+}).then(r => r.json()).then(d => console.log(d)).catch(e => console.error(e));
 
   S.phase = 'results';
   render();
